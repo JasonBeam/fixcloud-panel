@@ -1,0 +1,39 @@
+# 本仓库专用 Gitleaks 配置：继承默认 + 自定义中文/节点规则，再精确收录已复核的代码表达式与合成测试占位符。
+# 必须在仓库根运行（extend path 相对进程 CWD）。
+title = "fixcloud-panel repo config"
+[extend]
+path = "tools/gitleaks-custom-rules.toml"
+
+[[allowlists]]
+description = "已复核：文档占位符、代码表达式、合成测试 fixture（非真实凭据）"
+regexTarget = "line"
+regexes = [
+  '''00000000-0000-4000-8000-000000000000''',
+  '''<EXAMPLE_[A-Z0-9_]*>''',
+  '''<[A-Z][A-Z0-9_]*>''',
+  '''secrets\.token_(hex|urlsafe)''',
+  '''token = request\.cookies\.get''',
+  '''token = new_token\(\)''',
+  '''self\.password = password''',
+  '''password=self\.password or None''',
+  '''password=str\(source\.config\.get''',
+  '''password: form\.password''',
+  '''password: "连接认证密码"''',
+  '''password: example''',
+  '''password: proxy-private''',
+  '''webdav_password="dav-password"''',
+  '''password: secret''',
+]
+
+[[allowlists]]
+description = "扫描工具自身与构建产物/虚拟环境（不入库）"
+paths = [
+  '''^tools/verify-sanitized\.py$''',
+  '''^tools/gitleaks-custom-rules\.toml$''',
+  '''^tools/gitleaks-repo\.toml$''',
+  '''^frontend/dist/''',
+  '''^frontend/node_modules/''',
+  '''^backend/\.venv/''',
+  '''__pycache__''',
+  '''^\.pytest_cache/''',
+]

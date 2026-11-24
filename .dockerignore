@@ -1,0 +1,14 @@
+.git
+.env
+**/.DS_Store
+**/._*
+**/__pycache__
+**/.pytest_cache
+**/.venv
+frontend/node_modules
+frontend/dist
+data
+
+
+secrets
+backup-vps-20261122

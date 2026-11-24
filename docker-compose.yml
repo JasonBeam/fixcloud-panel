@@ -1,0 +1,66 @@
+services:
+  fixcloud-panel:
+    build:
+      context: .
+    container_name: ${CONTAINER_NAME:-fixcloud-panel}
+    restart: unless-stopped
+    networks:
+      - fixcloud
+    user: "${PUID:-1000}:${PGID:-100}"
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DATA_DIR: /data
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-smb-mounted}
+      STORAGE_ROOT: /mnt/fixcloud
+      YAML_PATH: ${YAML_PATH:-/FixCloud.yaml}
+      WRITE_ENABLED: ${WRITE_ENABLED:-false}
+      PUBLIC_FILE_BASE_URL: ${PUBLIC_FILE_BASE_URL:-https://file.example.com}
+    # 容器所在 bridge 只有 IPv6 内部地址、没有 NAT66：把公开域名指到 IPv6 网关，
+    # 由宿主机上的 Lucky 本地投递，避免“核对线上 YAML”因容器 IPv6 出站不通而超时。
+    extra_hosts:
+      - "${PUBLIC_FILE_DOMAIN:-file.example.com}:${PUBLIC_FILE_LAN_IPV6:-fd00::1}"
+    ports:
+      - "${PANEL_BIND_IP:-0.0.0.0}:${PANEL_PORT:-8787}:8080"
+    volumes:
+      - type: bind
+        source: ${SMB_MOUNT_PATH:?请在 .env 中设置 SMB_MOUNT_PATH}
+        target: /mnt/fixcloud
+        read_only: ${YAML_MOUNT_READ_ONLY:-true}
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${APP_DATA_HOST_PATH:?请在 .env 中设置 APP_DATA_HOST_PATH}
+        target: /data
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+networks:
+  fixcloud:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: ${FIXCLOUD_IPV4_SUBNET:-10.0.8.0/24}
+        - subnet: ${FIXCLOUD_IPV6_SUBNET:-fd00::1::/64}

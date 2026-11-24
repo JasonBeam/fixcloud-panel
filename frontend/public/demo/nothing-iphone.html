@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f5f5" />
+  <title>FixCloud · iPhone 设计演示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --page:#f5f5f5; --surface:#fff; --raised:#f0f0f0; --line:#e8e8e8; --line-strong:#ccc;
+      --ink:#111; --muted:#626262; --faint:#858585; --accent:#d71921; --success:#34844a;
+      --inverse:#111; --inverse-ink:#fff; --font-ui:"Space Grotesk","PingFang SC",-apple-system,sans-serif;
+      --font-data:"Space Mono","SF Mono",monospace;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --page:#000; --surface:#111; --raised:#1a1a1a; --line:#242424; --line-strong:#3c3c3c;
+      --ink:#f4f4f4; --muted:#a4a4a4; --faint:#777; --success:#69bb7a;
+      --inverse:#f4f4f4; --inverse-ink:#111;
+    }
+    * { box-sizing:border-box; }
+    html { min-height:100%; background:var(--page); }
+    body { margin:0; min-width:320px; min-height:100dvh; color:var(--ink); background:var(--page); font-family:var(--font-ui); -webkit-font-smoothing:antialiased; }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .desktop-note { display:none; }
+    .app { max-width:440px; min-height:100dvh; margin:auto; background:var(--page); position:relative; }
+    .shell { padding:0 20px calc(100px + env(safe-area-inset-bottom)); }
+    .top { min-height:74px; padding-top:calc(14px + env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { font-family:var(--font-data); font-size:12px; letter-spacing:.13em; line-height:1.5; }
+    .brand strong { display:block; font-family:var(--font-ui); font-size:20px; font-weight:600; letter-spacing:-.035em; }
+    .top-tools { display:flex; gap:6px; }
+    .circle { width:44px; height:44px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); border-radius:50%; display:grid; place-items:center; flex:none; }
+    .circle svg { width:19px; height:19px; stroke:currentColor; stroke-width:1.7; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    .circle:active,.pill:active,.tab:active,.row:active { opacity:.68; }
+    .demo-banner { display:flex; align-items:center; gap:7px; margin:11px 0 22px; font:11px var(--font-data); letter-spacing:.06em; color:var(--muted); }
+    .demo-banner i { width:7px; height:7px; background:var(--accent); border-radius:50%; }
+    .file-chip { border:1px solid var(--line-strong); border-radius:999px; background:var(--surface); color:var(--ink); width:100%; min-height:48px; padding:0 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; }
+    .file-chip span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:14px; }
+    .file-chip small { font:10px var(--font-data); color:var(--muted); margin-left:auto; }
+    .eyebrow { margin:0 0 6px; color:var(--muted); font:11px var(--font-data); letter-spacing:.12em; text-transform:uppercase; }
+    .hero { margin:30px 0 27px; }
+    .hero h1 { margin:0; font-size:39px; line-height:1.08; letter-spacing:-.055em; font-weight:500; }
+    .hero p:last-child { margin:12px 0 0; color:var(--muted); font-size:14px; line-height:1.5; }
+    .section-title { margin:31px 2px 10px; font:11px var(--font-data); color:var(--muted); letter-spacing:.13em; text-transform:uppercase; }
+    .group { overflow:hidden; background:var(--surface); border:1px solid var(--line); border-radius:15px; }
+    .row { display:flex; align-items:center; width:100%; min-height:66px; padding:11px 16px; text-align:left; background:none; border:0; color:var(--ink); gap:13px; }
+    .row + .row { border-top:1px solid var(--line); }
+    .row-main { min-width:0; flex:1; }
+    .row-main strong { display:block; font-size:16px; font-weight:500; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .row-main small { display:block; margin-top:3px; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .row-count { color:var(--muted); font:12px var(--font-data); }
+    .chev { color:var(--faint); font-size:22px; line-height:1; font-weight:400; }
+    .row-icon { flex:none; width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--line-strong); border-radius:9px; font:13px var(--font-data); }
+    .row-icon.red { color:var(--accent); border-color:var(--accent); }
+    .page-head { display:grid; grid-template-columns:48px 1fr 70px; align-items:center; min-height:64px; gap:4px; }
+    .page-head h1 { margin:0; text-align:center; font-size:18px; font-weight:600; letter-spacing:-.025em; }
+    .page-head .right { justify-self:end; }
+    .pill { min-height:44px; border:1px solid var(--line-strong); border-radius:999px; background:var(--surface); color:var(--ink); padding:0 17px; font:12px var(--font-data); white-space:nowrap; }
+    .pill.primary { border-color:var(--inverse); background:var(--inverse); color:var(--inverse-ink); }
+    .pill:disabled { opacity:.38; cursor:default; }
+    .list-meta { display:flex; align-items:center; justify-content:space-between; margin:20px 0 13px; color:var(--muted); font:11px var(--font-data); }
+    .search { width:100%; min-height:48px; margin:12px 0 5px; padding:0 15px; border:1px solid var(--line-strong); border-radius:9px; background:var(--surface); color:var(--ink); font-size:16px; }
+    .search::placeholder { color:var(--faint); }
+    .group-row { min-height:72px; }
+    .group-row .row-icon { border:0; font-size:18px; }
+    .group-row .row-main small { font:11px var(--font-data); color:var(--muted); text-transform:uppercase; }
+    .rule-code { width:74px; flex:none; color:var(--muted); font:11px var(--font-data); line-height:1.35; overflow-wrap:anywhere; }
+    .rule-row .row-main strong { font-size:15px; }
+    .target { color:var(--muted); max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:12px var(--font-data); }
+    .dirty { text-align:center; color:var(--accent); font:10px var(--font-data); margin-top:-5px; letter-spacing:.07em; }
+    .field-row { min-height:61px; padding:12px 16px; display:flex; align-items:center; gap:12px; border-top:1px solid var(--line); }
+    .field-row:first-child { border:0; }
+    .field-label { flex:1; min-width:0; font-size:15px; }
+    .field-label small { display:block; margin-top:4px; color:var(--muted); font-size:11px; }
+    .field-value { max-width:60%; color:var(--muted); font:13px var(--font-data); text-align:right; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .field-input { width:54%; min-width:0; height:37px; border:0; border-bottom:1px solid var(--line-strong); background:transparent; color:var(--ink); font-size:16px; text-align:right; border-radius:0; }
+    .field-select { max-width:55%; height:38px; padding:0 3px; border:0; background:transparent; color:var(--ink); text-align:right; font-size:16px; }
+    .field-switch { appearance:none; width:44px; height:27px; border-radius:999px; background:var(--line-strong); position:relative; flex:none; transition:background .18s ease-out; }
+    .field-switch::before { content:""; position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:var(--surface); transition:transform .18s ease-out; }
+    .field-switch:checked { background:var(--inverse); }
+    .field-switch:checked::before { transform:translateX(17px); }
+    .field-switch:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .field-help { margin:8px 2px 0; color:var(--muted); font-size:12px; line-height:1.5; }
+    .subtle-action { margin-top:24px; width:100%; min-height:48px; border:1px solid var(--line-strong); border-radius:9px; background:transparent; color:var(--ink); font:12px var(--font-data); }
+    .status-line { display:flex; align-items:center; gap:8px; color:var(--muted); font:12px var(--font-data); }
+    .status-line i { width:7px; height:7px; border-radius:50%; background:var(--success); }
+    .usage-hero { padding:22px 0 8px; }
+    .usage-hero .number { display:block; margin-top:7px; font:39px var(--font-data); letter-spacing:-.055em; }
+    .usage-hero .number small { font-size:13px; letter-spacing:0; }
+    .segments { display:grid; grid-template-columns:repeat(20,1fr); gap:2px; margin:17px 0 8px; height:8px; }
+    .segments i { display:block; background:var(--line-strong); }
+    .segments i.filled { background:var(--inverse); }
+    .usage-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px; }
+    .stat { padding:16px; background:var(--surface); border:1px solid var(--line); border-radius:13px; }
+    .stat strong { display:block; margin-top:12px; font:19px var(--font-data); }
+    .stat small { color:var(--muted); font:10px var(--font-data); }
+    .bottom { position:fixed; z-index:5; bottom:0; left:50%; transform:translateX(-50%); width:min(440px,100%); display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); background:var(--surface); padding:7px 7px calc(7px + env(safe-area-inset-bottom)); }
+    .tab { min-height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:0; background:none; color:var(--faint); font:10px var(--font-data); }
+    .tab .symbol { font:22px var(--font-ui); line-height:1; }
+    .tab.active { color:var(--ink); }
+    .tab.active .symbol::after { content:""; display:block; width:4px; height:4px; border-radius:50%; background:var(--accent); margin:3px auto -7px; }
+    .sheet-backdrop { position:fixed; z-index:9; inset:0; background:rgba(0,0,0,.58); display:flex; align-items:flex-end; justify-content:center; }
+    .sheet { width:min(440px,100%); max-height:88dvh; overflow:auto; padding:14px 20px calc(24px + env(safe-area-inset-bottom)); border:1px solid var(--line-strong); border-radius:16px 16px 0 0; background:var(--surface); }
+    .handle { width:38px; height:3px; margin:0 auto 22px; background:var(--line-strong); border-radius:9px; }
+    .sheet-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:17px; }
+    .sheet-title h2 { margin:0; font-size:19px; font-weight:500; }
+    .sheet-choice { width:100%; min-height:57px; padding:10px 0; border:0; border-top:1px solid var(--line); background:none; color:var(--ink); display:flex; align-items:center; justify-content:space-between; text-align:left; }
+    .sheet-choice small { display:block; color:var(--muted); margin-top:3px; font-size:12px; }
+    .diff { display:grid; grid-template-columns:1fr; gap:10px; }
+    .diff pre { white-space:pre-wrap; word-break:break-word; margin:0; padding:13px; border:1px solid var(--line); border-radius:8px; background:var(--raised); color:var(--ink); font:11px/1.6 var(--font-data); }
+    .diff-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:22px; }
+    .empty { padding:40px 16px; color:var(--muted); text-align:center; font-size:14px; }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    @media (min-width:700px) {
+      body { display:grid; place-items:center; padding:42px 20px; }
+      .desktop-note { display:block; position:fixed; top:26px; left:28px; font:11px var(--font-data); color:var(--muted); letter-spacing:.08em; }
+      .app { width:393px; min-height:800px; max-height:850px; overflow:auto; border:1px solid var(--line-strong); border-radius:28px; }
+      .app .shell { min-height:800px; padding-bottom:105px; }
+      .bottom { position:fixed; bottom:calc((100dvh - min(850px,100dvh - 84px))/2); width:393px; border:1px solid var(--line-strong); border-radius:0 0 27px 27px; }
+      .sheet-backdrop { align-items:center; }
+      .sheet { border-radius:16px; max-height:700px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+  </style>
+</head>
+<body>
+  <div class="desktop-note">FIXCLOUD / IPHONE CONCEPT / NOTHING-INSPIRED</div>
+  <div id="app" class="app"></div>
+  <script>
+    const icons = {
+      moon:'<svg viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8 8 0 1 0 20 15.5Z"/></svg>',
+      sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4m0-14.2-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>',
+      arrow:'<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>',
+      plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+    };
+    const groups = [
+      {name:'Title',type:'Select',icon:'◎',members:['Youtu']},
+      {name:'Home',type:'Select',icon:'⌂',members:['DIRECT','Proxy']},
+      {name:'Proxy',type:'Fallback',icon:'◉',members:['Kycloud','Youtu']},
+      {name:'Domestic',type:'Select',icon:'▤',members:['DIRECT']},
+      {name:'Others',type:'Select',icon:'◌',members:['Proxy','DIRECT']},
+      {name:'AdBlock',type:'Select',icon:'×',members:['REJECT','DIRECT']},
+    ];
+    const rules = [
+      {type:'RULE-SET',content:'AdBlock',target:'AdBlock'},
+      {type:'RULE-SET',content:'Special',target:'DIRECT'},
+      {type:'DOMAIN-SUFFIX',content:'example.com',target:'DIRECT'},
+      {type:'IP-CIDR',content:'192.0.2.0/24',target:'Home'},
+      {type:'GEOIP',content:'CN',target:'Domestic'},
+      {type:'MATCH',content:'MATCH',target:'Others'},
+    ];
+    const samples = {
+      '通用设置':[{name:'连接与运行',summary:'端口、模式、日志级别',icon:'◎',fields:[['端口','7890'],['混合端口','7893'],['允许局域网',true,'switch'],['运行模式','Rule','mode'],['日志级别','Info','log']]}],
+      'DNS 服务器':[{name:'基础设置',summary:'监听、IPv6、增强模式',icon:'◍',fields:[['启用 DNS',true,'switch'],['监听地址','0.0.0.0:1053'],['IPv6',false,'switch'],['增强模式','Fake-IP']]},{name:'上游服务器',summary:'nameserver · 2 项',icon:'≡',fields:[['首选服务器','https://dns.example/dns-query'],['备用服务器','223.5.5.5']]}],
+      '本地代理':[{name:'Home SOCKS',summary:'SOCKS5 · 192.0.2.1:7891',icon:'◇',fields:[['名称','Home SOCKS'],['协议','SOCKS5'],['服务器','192.0.2.1'],['端口','7891']]},{name:'Backup',summary:'SS · example.net:443',icon:'◇',fields:[['名称','Backup'],['协议','SS'],['服务器','example.net'],['端口','443']]}],
+      '远程代理集':[{name:'Kycloud',summary:'HTTP · 每 3600 秒更新',icon:'▤',fields:[['名称','Kycloud'],['类型','HTTP'],['订阅 URL','https://example.com/ky'],['更新间隔','3600']]},{name:'Youtu',summary:'HTTP · 每 3600 秒更新',icon:'▤',fields:[['名称','Youtu'],['类型','HTTP'],['订阅 URL','https://example.com/yt'],['更新间隔','3600']]},{name:'DlerCloud',summary:'HTTP · 每 3600 秒更新',icon:'▤',fields:[['名称','DlerCloud'],['类型','HTTP'],['订阅 URL','https://example.com/dler'],['更新间隔','3600']]}],
+      '远程规则集':[{name:'AdBlock',summary:'DOMAIN · HTTP',icon:'⌘',fields:[['名称','AdBlock'],['类型','HTTP'],['行为','Domain'],['更新间隔','86400']]},{name:'Special',summary:'CLASSICAL · HTTP',icon:'⌘',fields:[['名称','Special'],['类型','HTTP'],['行为','Classical'],['更新间隔','86400']]}],
+      '其他设置':[{name:'高级字段',summary:'保留未知配置',icon:'⋯',fields:[['字段名称','sniffer'],['字段类型','对象'],['已配置',true,'switch']]}]
+    };
+    const categories = [
+      ['通用','通用设置','基础参数',8,'◎'],['通用','DNS 服务器','解析与过滤',6,'◍'],
+      ['代理','本地代理','节点配置',2,'◇'],['代理','策略组','节点选择与回退',32,'◉'],['代理','远程代理集','订阅来源',3,'▤'],
+      ['规则','规则','分流顺序',66,'≡'],['规则','远程规则集','规则来源',12,'⌘'],
+      ['扩展','HTTP 改写','请求处理',0,'↗'],['扩展','脚本','自动化',0,'{ }'],['扩展','其他设置','高级字段',5,'⋯']
+    ];
+    const state = {page:'editor', detail:null, sheet:null, search:'', dark:localStorage.getItem('fixcloud-nothing-demo-theme')==='dark', dirty:false, draft:{}, before:{}, selectedFile:'FixCloud.yaml', pending:null, notice:''};
+    const app = document.getElementById('app');
+    const esc = value => String(value).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    const button=(label,action,cls='pill')=>`<button class="${cls}" data-action="${action}" ${cls.includes(' disabled')?'disabled':''}>${label}</button>`;
+    const head=(title,right='')=>`<div class="page-head"><button class="circle" data-action="back" aria-label="返回">${icons.arrow}</button><h1>${title}</h1><div class="right">${right}</div></div>`;
+    const fileChip=()=>`<button class="file-chip" data-action="files"><span>${esc(state.selectedFile)}</span><small>NAS SMB</small><span class="chev">⌄</span></button>`;
+    const row=(icon,title,sub,count,action)=>`<button class="row" data-action="${action}"><span class="row-icon">${icon}</span><span class="row-main"><strong>${esc(title)}</strong><small>${esc(sub)}</small></span><span class="row-count">${count}</span><span class="chev">›</span></button>`;
+    function editor(){
+      return `${fileChip()}<div class="hero"><p class="eyebrow">VISUAL EDITOR / 01</p><h1>配置，<br>一目了然。</h1><p>选择分类，进入结构化参数编辑。</p></div>${['通用','代理','规则','扩展'].map(section=>`<p class="section-title">${section}</p><div class="group">${categories.filter(x=>x[0]===section).map(x=>row(x[4],x[1],x[2],String(x[3]).padStart(2,'0'),`open:${x[1]}`)).join('')}</div>`).join('')}`;
+    }
+    function list(kind){
+      const isGroup=kind==='策略组', isRules=kind==='规则';
+      const data=isGroup?groups:isRules?rules:samples[kind]||[];
+      const term=state.search.toLowerCase();
+      const filtered=data.map((item,index)=>({...item,index})).filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes(term)));
+      return `${head(kind,button(icons.plus,'add','circle'))}<input class="search" id="search" aria-label="搜索${kind}" placeholder="搜索${kind}…" value="${esc(state.search)}"/><div class="list-meta"><span>${filtered.length} 项</span><span>示例数据</span></div><div class="group">${filtered.length?filtered.map(item=>isGroup?`<button class="row group-row" data-action="detail:${item.index}"><span class="row-icon ${item.name==='Proxy'?'red':''}">${item.icon}</span><span class="row-main"><strong>${esc(item.name)}</strong><small>${esc(item.type)}</small></span><span class="chev">›</span></button>`:isRules?`<button class="row rule-row" data-action="detail:${item.index}"><span class="rule-code">${esc(item.type)}</span><span class="row-main"><strong>${esc(item.content)}</strong></span><span class="target">${esc(item.target)}</span><span class="chev">›</span></button>`:`<button class="row" data-action="detail:${item.index}"><span class="row-icon">${item.icon}</span><span class="row-main"><strong>${esc(item.name)}</strong><small>${esc(item.summary)}</small></span><span class="chev">›</span></button>`).join(''):`<div class="empty">${term?'没有匹配项目':'此分类暂无项目'}</div>`}</div>`;
+    }
+    function field(label,value,kind='text',sub=''){
+      const live=Object.prototype.hasOwnProperty.call(state.draft,label)?state.draft[label]:value;
+      const options=label==='规则类型'?['RULE-SET','DOMAIN-SUFFIX','DOMAIN','IP-CIDR','GEOIP','MATCH']:['Select','URL Test','Fallback','Load Balance'];
+      const input=kind==='switch'?`<input class="field-switch" type="checkbox" ${live?'checked':''} data-change="dirty" data-initial="${esc(value)}" aria-label="${esc(label)}"/>`:kind==='select'?`<select class="field-select" data-change="dirty" data-initial="${esc(value)}" aria-label="${esc(label)}">${options.map(option=>`<option ${option===live?'selected':''}>${option}</option>`).join('')}</select>`:kind==='link'?`<span class="field-value">${esc(live)}</span><span class="chev">›</span>`:`<input class="field-input" type="text" value="${esc(live)}" data-change="dirty" data-initial="${esc(value)}" aria-label="${esc(label)}"/>`;
+      const inner=`<div class="field-label">${esc(label)}${sub?`<small>${esc(sub)}</small>`:''}</div>${input}`;
+      return kind==='link'?`<button class="field-row" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;color:var(--ink);text-align:left" data-action="picker:${esc(label)}">${inner}</button>`:`<div class="field-row">${inner}</div>`;
+    }
+    function detail(){
+      const isGroup=state.page==='策略组', isRule=state.page==='规则';
+      const item=isGroup?groups[state.detail]||{name:'',type:'Select',members:[]}:isRule?rules[state.detail]||{type:'RULE-SET',content:'',target:'Proxy'}:(samples[state.page]||[])[state.detail]||{name:'新项目',fields:[['名称','']]};
+      const title=state.page;
+      let content='';
+      if(isGroup) content=`<p class="section-title">通用设置</p><div class="group">${field('名称',item.name)}${field('类型',item.type,'select')}${field('图标 URL','https://…')}${field('从列表中隐藏',false,'switch')}${field('备注','')}</div><p class="section-title">成员来源</p><div class="group">${field('包括代理和策略组',String(item.members.length)+' 项','link')}${field('包括远程代理集','1 项','link')}${field('包括所有代理',false,'switch')}${field('正则表达式过滤器','GPT|OpenAI')}</div><p class="section-title">选项</p><div class="group">${field('延迟测试间隔','600')}${field('惰性模式',false,'switch')}</div>`;
+      else if(isRule) content=`<p class="section-title">基础信息</p><div class="group">${field('规则类型',item.type,'select')}${field('内容',item.content)}${field('分流策略',item.target,'link')}</div><p class="section-title">选项</p><div class="group">${field('不解析主机名',false,'switch')}${field('隐藏连接',false,'switch')}${field('备注','')}</div>`;
+      else content=`<p class="section-title">${esc(item.name)}</p><div class="group">${item.fields.map(([label,value,kind])=>field(label,value,kind||'text')).join('')}</div><p class="field-help">仅展示此分类的 iPhone 参数排版；数据为示例。</p>`;
+      return `${head(title,button('保存','save','pill primary'+(state.dirty?'':' disabled')))}${state.dirty?'<div class="dirty">● 有未保存修改</div>':''}${content}<button class="subtle-action" data-action="advanced">高级字段 ›</button>`;
+    }
+    function sources(){
+      return `${head('文件来源',button(icons.plus,'add-source','circle'))}<div class="hero"><p class="eyebrow">YOUR FILES / 02</p><h1>文件，<br>由你选择。</h1><p>连接来源与当前配置清楚分开。</p></div><p class="section-title">当前配置</p>${fileChip()}<p class="section-title">已添加来源</p><div class="group">${row('▤','NAS SMB','config 目录 · 已连接','02','source-detail')}</div><p class="field-help">仅显示用户主动添加的来源。示例页面不会连接 NAS。</p>`;
+    }
+    function usage(){
+      return `${head('流量')}${fileChip()}<div class="hero" style="margin-bottom:5px"><p class="eyebrow">SUBSCRIPTION / 03</p><h1>使用情况</h1></div><p class="section-title">KYCloud · 示例数据</p><div class="usage-hero"><span class="eyebrow">剩余流量</span><span class="number">256.07<small> GB</small></span><div class="segments">${Array.from({length:20},(_,i)=>`<i class="${i<14?'filled':''}"></i>`).join('')}</div><div class="status-line"><i></i>剩余 70% · 数据仅用于设计演示</div></div><div class="usage-stats"><div class="stat"><small>到期时间</small><strong>2027.04.02</strong></div><div class="stat"><small>剩余天数</small><strong>189 DAY</strong></div></div><p class="section-title">其他订阅</p><div class="group">${row('▤','Youtu','剩余 147.05 GB','›','noop')}${row('▤','DlerCloud','状态正常','›','noop')}</div>`;
+    }
+    function more(){ return `${head('更多')}<div class="hero"><p class="eyebrow">CONTROL / 04</p><h1>工具与状态。</h1></div><p class="section-title">配置</p><div class="group">${row('◇','订阅节点','查看机场节点','','noop')}${row('↺','配置历史','查看与恢复','','noop')}${row('⚙','系统设置','日志与连接','','noop')}</div><p class="section-title">当前状态</p><div class="group"><div class="field-row"><div class="field-label">后端连接</div><span class="status-line"><i></i>演示模式</span></div><div class="field-row"><div class="field-label">YAML 文件</div><span class="field-value">${esc(state.selectedFile)}</span></div></div>`; }
+    function sheet(){
+      if(!state.sheet)return '';
+      let body='';
+      if(state.sheet==='files') body=`<div class="sheet-title"><h2>选择 YAML</h2>${button('关闭','sheet-close')}</div><p class="eyebrow">NAS SMB / CONFIG</p>${['FixCloud.yaml','oixCloud.yaml'].map(name=>`<button class="sheet-choice" data-action="file:${name}"><span>${name}<small>NAS SMB · /config/${name}</small></span><span>›</span></button>`).join('')}`;
+      else if(state.sheet==='diff') body=`<div class="sheet-title"><h2>检查修改</h2>${button('关闭','sheet-close')}</div><p class="eyebrow">修改对比 · 演示</p><div class="diff"><pre>修改前\n${Object.entries(state.draft).map(([key])=>`${esc(key)}: ${esc(state.before[key])}`).join('\n')}</pre><pre>修改后\n${Object.entries(state.draft).map(([key,value])=>`${esc(key)}: ${esc(value)}`).join('\n')}</pre></div><p class="field-help">演示页不会向 NAS 发送任何保存请求。</p><div class="diff-actions">${button('返回编辑','sheet-close')}${button('模拟确认','demo-save','pill primary')}</div>`;
+      else if(state.sheet==='unsaved') body=`<div class="sheet-title"><h2>有未保存修改</h2></div><p class="field-help">离开前请选择如何处理当前草稿。</p><div class="diff-actions">${button('取消','sheet-close')}${button('查看 Diff','save','pill primary')}</div><button class="subtle-action" data-action="discard">放弃演示修改并继续</button>`;
+      else if(state.sheet.startsWith('picker:')) body=`<div class="sheet-title"><h2>${esc(state.sheet.slice(7))}</h2>${button('关闭','sheet-close')}</div><p class="eyebrow">可搜索的引用选择器 · 演示</p>${['Kycloud','Youtu','DlerCloud','DIRECT','Proxy'].map(name=>`<button class="sheet-choice" data-action="pick:${name}"><span>${name}<small>点击选择，更新当前演示草稿</small></span><span>›</span></button>`).join('')}`;
+      else body=`<div class="sheet-title"><h2>演示功能</h2>${button('关闭','sheet-close')}</div><p class="field-help">这一页只演示视觉与操作层级，没有连接正式数据。</p>`;
+      return `<div class="sheet-backdrop" data-action="sheet-close"><div class="sheet" data-action="sheet-content" role="dialog" aria-modal="true" aria-label="${state.sheet==='diff'?'检查修改':'选择操作'}"><div class="handle"></div>${body}</div></div>`;
+    }
+    function render(){
+      document.documentElement.dataset.theme=state.dark?'dark':'light';
+      const main=state.detail!==null?detail():state.page==='editor'?editor():state.page==='sources'?sources():state.page==='usage'?usage():state.page==='more'?more():list(state.page);
+      const root=state.page==='策略组'||state.page==='规则'?'editor':state.page;
+      app.innerHTML=`<div class="shell"><header class="top"><div class="brand">NAS CONFIG CENTER<strong>FixCloud</strong></div><div class="top-tools"><button class="circle" data-action="theme" aria-label="切换深色模式">${state.dark?icons.sun:icons.moon}</button></div></header><div class="demo-banner"><i></i>IPHONE DESIGN DEMO · 示例数据</div><main>${main}</main></div><nav class="bottom" aria-label="演示导航">${[['editor','◎','编辑'],['sources','▤','来源'],['usage','◴','流量'],['more','⋯','更多']].map(([key,symbol,label])=>`<button class="tab ${root===key?'active':''}" data-action="nav:${key}"><span class="symbol">${symbol}</span>${label}</button>`).join('')}</nav>${sheet()}`;
+      if(state.notice){const el=document.createElement('div');el.textContent=state.notice;el.setAttribute('role','status');el.style.cssText='position:fixed;z-index:10;left:50%;bottom:92px;transform:translateX(-50%);background:var(--inverse);color:var(--inverse-ink);padding:10px 15px;border-radius:999px;font:11px var(--font-data);white-space:nowrap;';app.append(el);setTimeout(()=>{state.notice='';el.remove()},2200)}
+    }
+    function move(next){state.search='';state.detail=null;state.page=next;window.scrollTo(0,0);app.scrollTo(0,0);render()}
+    function guarded(next){if(state.dirty){state.pending=next;state.sheet='unsaved';render()}else next()}
+    app.addEventListener('click',e=>{
+      const action=e.target.closest('[data-action]')?.dataset.action;if(!action)return;
+      if(action==='theme'){state.dark=!state.dark;localStorage.setItem('fixcloud-nothing-demo-theme',state.dark?'dark':'light');render()}
+      else if(action==='files'){state.sheet='files';render()}
+      else if(action==='sheet-close'){state.sheet=null;render()}
+      else if(action==='sheet-content')return;
+      else if(action==='back')guarded(()=>state.detail!==null?(state.detail=null,render()):move('editor'));
+      else if(action.startsWith('nav:'))guarded(()=>move(action.slice(4)));
+      else if(action.startsWith('open:'))move(action.slice(5));
+      else if(action.startsWith('detail:')){state.detail=Number(action.slice(7));state.draft={};state.before={};state.dirty=false;render()}
+      else if(action.startsWith('file:'))guarded(()=>{state.selectedFile=action.slice(5);state.sheet=null;state.notice='已切换演示文件';render()});
+      else if(action==='save'&&state.dirty){state.sheet='diff';render()}
+      else if(action==='demo-save'){state.sheet=null;state.dirty=false;state.draft={};state.before={};const next=state.pending;state.pending=null;state.notice='演示完成 · 未写入 YAML';next?next():render()}
+      else if(action==='discard'){const next=state.pending;state.dirty=false;state.draft={};state.before={};state.sheet=null;state.pending=null;next?next():render()}
+      else if(action==='add'){state.detail=999;state.draft={};state.before={};state.dirty=false;render()}
+      else if(action.startsWith('picker:')){state.sheet=action;render()}
+      else if(action.startsWith('pick:')){const label=state.sheet.slice(7);state.before[label]=label==='分流策略'?'Proxy':'1 项';state.draft[label]=action.slice(5);state.dirty=true;state.sheet=null;render()}
+      else {state.sheet='placeholder';render()}
+    });
+    app.addEventListener('input',e=>{
+      if(e.target.id==='search'){state.search=e.target.value;const start=e.target.selectionStart;render();const input=document.getElementById('search');input?.focus();input?.setSelectionRange(start,start)}
+      else if(e.target.dataset.change==='dirty'){
+        const label=e.target.getAttribute('aria-label'), initial=e.target.dataset.initial;
+        const value=e.target.type==='checkbox'?e.target.checked:e.target.value;
+        if(String(value)===String(initial)){delete state.draft[label];delete state.before[label]}
+        else {state.draft[label]=value;state.before[label]=initial}
+        state.dirty=Object.keys(state.draft).length>0;
+        const mark=document.querySelector('.dirty');
+        if(state.dirty&&!mark)document.querySelector('.page-head')?.insertAdjacentHTML('afterend','<div class="dirty">● 有未保存修改</div>');
+        if(!state.dirty)mark?.remove();
+        const save=document.querySelector('[data-action="save"]');save?.toggleAttribute('disabled',!state.dirty);save?.classList.toggle('disabled',!state.dirty)
+      }
+    });
+    app.addEventListener('change',e=>{if(e.target.dataset.change==='dirty'){state.dirty=true;render()}});
+    render();
+  </script>
+</body>
+</html>
