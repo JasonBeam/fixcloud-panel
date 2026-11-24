@@ -245,8 +245,8 @@ async function save() {
         </label>
 
         <template v-if="form.type === 'smb'">
-          <label class="form-card"><span>服务器地址</span><input v-model="form.server" placeholder="192.168.11.193" /></label>
-          <label class="form-card"><span>共享目录</span><input v-model="form.share" placeholder="BeamJason" /></label>
+          <label class="form-card"><span>服务器地址</span><input v-model="form.server" placeholder="192.0.2.10" /></label>
+          <label class="form-card"><span>共享目录</span><input v-model="form.share" placeholder="files" /></label>
           <label class="form-card"><span>用户名</span><input v-model="form.username" autocomplete="off" :placeholder="source ? '留空保持原用户名' : 'SMB 用户名'" /></label>
           <label class="form-card"><span>密码</span><input v-model="form.password" type="password" autocomplete="new-password" :placeholder="source ? '留空保持原密码' : 'SMB 密码'" /></label>
           <label class="form-card source-root-field"><span>根目录</span><input v-model="form.rootDirectory" placeholder="files（可选）" /></label>

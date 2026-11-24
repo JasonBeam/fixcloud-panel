@@ -14,6 +14,12 @@ DOC_NETS = [ipaddress.ip_network(n) for n in (
     "192.88.99.0/24", "198.18.0.0/15",
 )]
 DOC_V6 = [ipaddress.ip_network(n) for n in ("2001:db8::/32", "::1/128", "fe80::/10", "fc00::/7", "fd00::/8")]
+# 随前端构建产物分发到浏览器的资产：连占位符也不得携带真实内网地址。
+# 全局白名单豁免 RFC1918 是为了容忍文档中的内网拓扑描述，但打包进 dist 的
+# 源码/静态资源会随面板 UI 暴露给任何能访问面板的人，因此单独收紧。
+SHIPPED_PREFIXES = ("frontend/src/", "frontend/public/")
+PRIVATE_NETS = [ipaddress.ip_network(n) for n in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7")]
+EXAMPLE_NETS = [ipaddress.ip_network(n) for n in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "2001:db8::/32")]
 ALLOW_DOMAINS = {
     "example.com","example.org","example.net","example.invalid","localhost",
     "github.com","gist.github.com","raw.githubusercontent.com","objects.githubusercontent.com",
@@ -108,11 +114,22 @@ def is_doc_ip(s):
     nets = DOC_NETS if a.version == 4 else DOC_V6
     return any(a in n for n in nets)
 
+def is_shipped_private_ip(s):
+    """True if a private-range address appears in a browser-shipped asset."""
+    try:
+        a = ipaddress.ip_address(s)
+    except ValueError:
+        return False
+    if any(a in n for n in EXAMPLE_NETS):
+        return False
+    return any(a in n for n in PRIVATE_NETS)
+
 def looks_placeholder(v):
     return any(h in v for h in PLACEHOLDER_HINTS)
 
-def scan_file(path):
+def scan_file(path, rel=""):
     out = []
+    shipped = rel.replace(os.sep, "/").startswith(SHIPPED_PREFIXES)
     try:
         raw = open(path, "rb").read()
     except Exception:
@@ -131,11 +148,15 @@ def scan_file(path):
                 continue
             if not is_doc_ip(m.group(0)):
                 out.append((i, "public-or-unknown-ipv4"))
+            elif shipped and is_shipped_private_ip(m.group(0)):
+                out.append((i, "shipped-asset-private-ip"))
         for m in RE_IPV6.finditer(line):
             if m.group(0) in ALLOW_PUBLIC_IPS:
                 continue
             if not is_doc_ip(m.group(0)):
                 out.append((i, "public-or-unknown-ipv6"))
+            elif shipped and is_shipped_private_ip(m.group(0)):
+                out.append((i, "shipped-asset-private-ip"))
         for m in RE_EMAIL.finditer(line):
             if m.group(1).lower() not in ALLOW_EMAIL_DOMAINS:
                 out.append((i, "email-pii"))
@@ -239,7 +260,7 @@ def main():
             if ignored and (rel in ignored or any(rel.startswith(d + "/") for d in ignored)):
                 skipped_ignored += 1
                 continue
-            for line, kind in scan_file(p):
+            for line, kind in scan_file(p, rel):
                 findings.append({"file": rel, "line": line, "type": kind})
                 per_type[kind] += 1
                 per_file[rel] += 1
