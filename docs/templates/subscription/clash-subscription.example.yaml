@@ -1,0 +1,52 @@
+# Clash 订阅输出骨架（脱敏示例，我方重写）
+# 渲染器以此为结构，按 token scope 填充节点；所有值均为文档示例值。
+port: 7890
+socks-port: 7891
+allow-lan: false
+mode: rule
+log-level: info
+# 注意：对外订阅视图【不要】输出 external-controller / secret
+
+proxies:
+  - name: "node-a-ss2022"
+    type: ss
+    server: 192.0.2.10
+    port: 18388
+    cipher: 2022-blake3-aes-128-gcm
+    password: "<EXAMPLE_SS2022_KEY_BASE64_16B>"
+    udp: true
+
+  - name: "node-b-reality"
+    type: vless
+    server: 198.51.100.20
+    port: 18443
+    uuid: 00000000-0000-4000-8000-000000000000
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: "<REALITY_HANDSHAKE_DOMAIN>"
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: "<EXAMPLE_REALITY_PUBLIC_KEY>"
+      short-id: "<EXAMPLE_SHORT_ID_HEX>"
+
+  - name: "node-c-hy2"
+    type: hysteria2
+    server: 203.0.113.30
+    port: 443
+    password: "<EXAMPLE_HY2_USER_PASSWORD>"
+    up: "100 Mbps"
+    down: "100 Mbps"
+    obfs: salamander
+    obfs-password: "<EXAMPLE_OBFS_PASSWORD>"
+    sni: node-a.example.com
+    skip-cert-verify: false
+
+proxy-groups:
+  - name: "PROXY"
+    type: select
+    proxies: ["node-a-ss2022", "node-b-reality", "node-c-hy2", "DIRECT"]
+
+rules:
+  - MATCH,PROXY

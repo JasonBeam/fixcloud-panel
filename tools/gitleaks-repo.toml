@@ -1,4 +1,5 @@
 # 本仓库专用 Gitleaks 配置：继承默认 + 自定义中文/节点规则，再精确收录已复核的代码表达式与合成测试占位符。
+# 源码 + docs/ 经验库共用此配置（原 homelab-panel 的文档占位符白名单已并入），保证判定一致。
 # 必须在仓库根运行（extend path 相对进程 CWD）。
 title = "fixcloud-panel repo config"
 [extend]
@@ -23,6 +24,8 @@ regexes = [
   '''password: proxy-private''',
   '''webdav_password="dav-password"''',
   '''password: secret''',
+  '''password=settings\.webdav_password''',
+  '''password=\.\.\.showPassword''',
 ]
 
 [[allowlists]]
@@ -36,4 +39,5 @@ paths = [
   '''^backend/\.venv/''',
   '''__pycache__''',
   '''^\.pytest_cache/''',
+  '''^docs/local/''',
 ]

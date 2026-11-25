@@ -45,3 +45,49 @@ backups/
 *-config-backup*
 .local-originals/
 screenshots/raw/
+
+# --- 经验库并入 2026-11-25：原 homelab-panel 的忽略规则合并 ---
+# 本地私有映射（真实 IP/域名/主机别名对照，仅本机，永不入库）
+docs/local/*
+!docs/local/README.md
+!docs/local/*.example.md
+# 补充凭据/密钥类型
+*.secret
+*.secrets
+*.env
+!*.env.example
+!*.env.template
+id_ecdsa*
+*_rsa
+.htpasswd
+# 补充数据库/状态
+*.sqlite
+*.sqlite3-journal
+*.db-journal
+*.pid
+# 补充备份/压缩归档
+*.tar.gz
+*.gz
+*.7z
+*.rar
+*.bak
+*.backup
+# 补充构建产物/依赖/缓存
+node_modules/
+dist/
+build/
+venv/
+.mypy_cache/
+.ruff_cache/
+.vite/
+*.tsbuildinfo
+coverage/
+.cache/
+# 编辑器/系统
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+# 截图原图（只允许脱敏后的截图）
+*.raw.png

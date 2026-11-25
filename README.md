@@ -2,9 +2,8 @@
 
 运行在 NAS Docker 中的 Clash / Mihomo YAML 图形化管理后台。默认使用 NAS 主机挂载目录，支持额外添加 SMB 和 WebDAV 文件来源。
 
-> **关联知识库与开发中心**：https://github.com/JasonBeam/homelab-panel （Private）
-> 本仓库是**源码唯一事实源**；架构说明、API 数据流、UI 规范、部署与验收清单、私有订阅中心方案、安全边界方案、故障案例与后续 Roadmap 都在该知识库的 `panels/fixcloud-panel/`、`design/`、`roadmap/`、`playbooks/`、`troubleshooting/` 下。
-> 约定：源码改动在本仓库提交；**每次开发或故障修复后，把已验证的技术经验同步回知识库**。两仓库以链接关联，不使用 submodule，不互相复制源码。
+> **Homelab 经验库已并入本仓库 `docs/`**（原独立私有仓库 `JasonBeam/homelab-panel`，2026-11-25 合并后删除）：架构说明、API 数据流、UI 规范、部署与验收清单、私有订阅中心方案、安全边界方案、故障案例与后续 Roadmap 见 [docs/README.md](docs/README.md) 导航下的 `docs/panels/fixcloud-panel/`、`docs/design/`、`docs/roadmap/`、`docs/playbooks/`、`docs/troubleshooting/`。
+> 本仓库是**源码唯一事实源**，源码与经验同仓共存。约定：源码改动在本仓库提交；**每次开发或故障修复后，把已验证的技术经验同步到 `docs/`**（见 [AGENTS.md](AGENTS.md)）。不使用 submodule，不复制参考项目源码。
 > 本仓库内所有域名/IP 默认值为**示例值**（`example.com` / `192.0.2.0/24` 等）；真实部署值由本机 **gitignore 的 `.env`** 注入，`docker compose` 自动读取。禁止把真实凭据提交入库。
 
 ## 主要功能

@@ -1,0 +1,48 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "hysteria2",
+      "tag": "hy2-in",
+      "listen": "::",
+      "listen_port": 443,
+      "up_mbps": 100,
+      "down_mbps": 100,
+      "obfs": {
+        "type": "salamander",
+        "password": "<EXAMPLE_OBFS_PASSWORD>"
+      },
+      "users": [
+        {
+          "name": "self",
+          "password": "<EXAMPLE_HY2_USER_PASSWORD>"
+        }
+      ],
+      "masquerade": "https://example.com/",
+      "tls": {
+        "enabled": true,
+        "server_name": "node-a.example.com",
+        "certificate_path": "/etc/sing-box/certs/fullchain.pem",
+        "key_path": "/etc/sing-box/certs/privkey.pem"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "final": "direct"
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "secret": "<EXAMPLE_CLASH_API_SECRET>"
+    }
+  }
+}

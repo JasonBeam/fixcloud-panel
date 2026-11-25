@@ -1,0 +1,36 @@
+# 面板类服务最小安全 compose 骨架（脱敏示例，我方重写）
+services:
+  panel:
+    image: <PANEL_IMAGE>:<PINNED_TAG>     # 钉版本，不用 latest
+    container_name: <PANEL_CONTAINER>
+    restart: unless-stopped
+    user: "<HOST_UID>:<HOST_GID>"          # 与宿主机数据属主一致
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      - panel-net
+    ports:
+      - "<LAN_OR_PUBLIC_BIND>:<HOST_PORT>:<CONTAINER_PORT>"   # 管理面不要绑公网
+    extra_hosts:
+      - "<PUBLIC_FILE_DOMAIN>:<BRIDGE_GATEWAY_IPV6>"          # 解决容器回环投递（见 infrastructure/06）
+    volumes:
+      - ./data:/data                                          # 状态/审计/缓存
+      - <CONFIG_DIR>:<CONFIG_MOUNT>:ro                        # 配置目录只读或按需 rw
+    env_file:
+      - .env                                                  # 真实值，0600，不入库
+    healthcheck:
+      test: ["CMD", "<REAL_HEALTH_COMMAND>"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  panel-net:
+    driver: bridge
+    enable_ipv6: true

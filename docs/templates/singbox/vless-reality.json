@@ -1,0 +1,51 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-reality-in",
+      "listen": "::",
+      "listen_port": 18443,
+      "users": [
+        {
+          "name": "self",
+          "uuid": "00000000-0000-4000-8000-000000000000",
+          "flow": "xtls-rprx-vision"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "<REALITY_HANDSHAKE_DOMAIN>",
+        "reality": {
+          "enabled": true,
+          "handshake": {
+            "server": "<REALITY_HANDSHAKE_DOMAIN>",
+            "server_port": 443
+          },
+          "private_key": "<EXAMPLE_REALITY_PRIVATE_KEY>",
+          "short_id": [
+            "<EXAMPLE_SHORT_ID_HEX>"
+          ]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "final": "direct"
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "secret": "<EXAMPLE_CLASH_API_SECRET>"
+    }
+  }
+}

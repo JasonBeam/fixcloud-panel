@@ -1,0 +1,35 @@
+# sing-box 官方镜像部署模板（我方重写，脱敏）
+# 用法：替换占位符 -> docker compose config 校验 -> 备份现有配置 -> up -d
+# 回滚：改回上一个镜像 tag 后 up -d；配置回滚用备份目录 + SIGHUP
+services:
+  sing-box:
+    image: ghcr.io/sagernet/sing-box:v1.14.4   # 钉版本，不用 latest
+    container_name: sing-box
+    restart: unless-stopped
+    command: -D /var/lib/sing-box -C /etc/sing-box/ run
+    networks:
+      - singbox-net            # 独立 bridge，不用 host，避免与 Lucky 抢端口
+    ports:
+      - "18388:18388/tcp"      # SS2022
+      - "18388:18388/udp"
+      # - "18443:18443/tcp"    # VLESS+REALITY（P2 再开）
+      # - "443:443/udp"        # Hysteria2（P3；TCP 443 已被 Lucky 占用，只开 UDP）
+    volumes:
+      - ./config:/etc/sing-box:ro          # 配置只读挂载
+      - ./data:/var/lib/sing-box           # 运行数据
+      - ./certs:/etc/sing-box/certs:ro     # 复用 Lucky 同步来的证书（hy2 需要）
+    # clash_api 只绑容器内 127.0.0.1，经 SSH 隧道访问，不映射到宿主机公网
+    healthcheck:
+      test: ["CMD", "sing-box", "check", "-C", "/etc/sing-box/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  singbox-net:
+    driver: bridge
