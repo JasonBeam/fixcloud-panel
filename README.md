@@ -1,144 +1,116 @@
-# FixCloud YAML 图形化管理面板
+# FixCloud Panel
 
-运行在 NAS Docker 中的 Clash / Mihomo YAML 图形化管理后台。默认使用 NAS 主机挂载目录，支持额外添加 SMB 和 WebDAV 文件来源。
+Clash / Mihomo YAML 配置的图形化管理面板。运行在 Docker 中，通过浏览器管理代理、规则、DNS 和策略组，保存前可预览完整变更。
 
-> **Homelab 经验库已并入本仓库 `docs/`**（原独立私有仓库 `JasonBeam/homelab-panel`，2026-11-25 合并后删除）：架构说明、API 数据流、UI 规范、部署与验收清单、私有订阅中心方案、安全边界方案、故障案例与后续 Roadmap 见 [docs/README.md](docs/README.md) 导航下的 `docs/panels/fixcloud-panel/`、`docs/design/`、`docs/roadmap/`、`docs/playbooks/`、`docs/troubleshooting/`。
-> 本仓库是**源码唯一事实源**，源码与经验同仓共存。约定：源码改动在本仓库提交；**每次开发或故障修复后，把已验证的技术经验同步到 `docs/`**（见 [AGENTS.md](AGENTS.md)）。不使用 submodule，不复制参考项目源码。
-> 本仓库内所有域名/IP 默认值为**示例值**（`example.com` / `192.0.2.0/24` 等）；真实部署值由本机 **gitignore 的 `.env`** 注入，`docker compose` 自动读取。禁止把真实凭据提交入库。
+![License](https://img.shields.io/github/license/JasonBeam/fixcloud-panel)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![Vue 3](https://img.shields.io/badge/Vue-3-42b883)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688)
 
-## 主要功能
+## 功能概览
 
-- Vue 3、TypeScript、Vite、Tailwind CSS 与 FastAPI
-- `ruamel.yaml` round-trip 文档树，保留注释、顺序、引号、未知字段和列表顺序
-- iPhone 安全区域、底部导航、全屏参数编辑和完整 Diff
-- Mac 左侧导航与宽屏双栏布局
-- 顶部 YAML 文件选择器，仅列出各来源“配置目录”直属的 `.yaml/.yml`
-- 每个浏览器标签页独立保存当前 `sourceId + path + hash`，不会互相改变保存目标
-- SMB 主机挂载、SMB 直连、WebDAV 三种文件访问方式
-- 每个外部来源独立设置根目录与配置目录；默认配置目录为 `config`
-- 不递归扫描配置目录以外的路径；选择哪个配置目录，就只编辑该目录直属 YAML
-- 来源连接测试、延迟、测试时间和明确错误原因
-- 来源凭据仅保存在后端 `/data/sources.json`，API 不返回账号或密码
-- 基础设置、DNS、proxies、proxy-providers、proxy-groups、rules、rule-providers、rewrite、script 和未知字段
-- 规则列表直接显示“匹配内容 → 策略组”
-- 策略组可从 WHATSINStash 公共图标目录搜索并选择图标 URL，选中后继续使用后端持久化缓存
-- 设置页提供 Lucky 公开文件服务入口，并可按真实字节哈希核对线上 YAML
-- 保存前完整 Diff、YAML 重新解析和 Clash / Mihomo 引用检查
-- SHA-256 冲突检查、临时恢复副本、临时文件回读、安全替换、正式文件回读和失败恢复
-- 历史版本按“来源 + YAML 文件”隔离，使用备份原始字节恢复
-- 操作日志不记录来源账号、来源密码或 YAML 配置值
+- **可视化编辑** — 基础设置、DNS、代理、策略组、规则、rule-providers、rewrite 和 script，支持未知字段保留
+- **多来源管理** — 默认 NAS 挂载目录，可额外添加 SMB 直连和 WebDAV 来源，每个来源独立设置配置目录
+- **安全保存** — 保存前完整 Diff、SHA-256 冲突检查、YAML 重新解析和 Clash/Mihomo 引用校验，失败自动恢复
+- **round-trip 保真** — 基于 ruamel.yaml，保留原始注释、顺序、引号和未知字段
+- **iPhone 适配** — 安全区域、底部导航、全屏参数编辑，支持 PWA 添加到主屏幕
+- **Mac 宽屏** — 左侧导航 + 双栏布局
+- **历史版本** — 按来源和文件隔离，使用备份原始字节恢复
+- **规则可视化** — 规则列表直接显示"匹配内容 → 策略组"
+- **策略组图标** — 从 WHATSINStash 公共图标目录搜索选择
 
-面板不提供登录页，适用于可信家庭内网或用户自己的内网隧道。写请求仍要求页面自动附带同源标记，避免普通跨站表单直接调用修改接口。
+## 快速开始
 
-## NAS Docker 架构
-
-容器使用 bridge 网络，并以 NAS 用户 UID/GID 运行。配置目录和应用数据都显式绑定到 NAS：
-
-```text
-/share/BeamJason/files/config       -> /mnt/fixcloud
-/share/Container/FixCloudPanel/data -> /data
-```
-
-以 NAS 用户运行可避免安全替换 YAML 后文件变成容器内部 UID。保存事务还会保留正式文件原有权限模式。
-
-## 部署
-
-项目目录：
-
-```text
-/share/Container/FixCloudPanel
-```
-
-创建持久化目录：
+### 1. 准备目录
 
 ```bash
-mkdir -p /share/Container/FixCloudPanel/data
+mkdir -p /path/to/config   # 存放 YAML 配置的目录
+mkdir -p /path/to/data     # 面板持久化数据
 ```
 
-复制并修改环境变量：
+### 2. 配置环境变量
 
 ```bash
 cp .env.example .env
 ```
 
-核心配置：
+编辑 `.env`，至少修改以下项：
 
 ```dotenv
 PANEL_PORT=8787
-PUID=1000
+SMB_MOUNT_PATH=/path/to/config          # 你的配置目录
+APP_DATA_HOST_PATH=/path/to/data        # 面板数据目录
+PUID=1000                               # 容器运行用户
 PGID=100
-FIXCLOUD_IPV4_SUBNET=10.0.8.0/24
-FIXCLOUD_IPV6_SUBNET=fd00::1::/64
-APP_DATA_HOST_PATH=/share/Container/FixCloudPanel/data
-SMB_MOUNT_PATH=/share/BeamJason/files/config
-YAML_PATH=/FixCloud.yaml
-YAML_MOUNT_READ_ONLY=false
-WRITE_ENABLED=true
-PUBLIC_FILE_BASE_URL=https://file.example.com
-PUBLIC_FILE_DOMAIN=file.example.com
-PUBLIC_FILE_LAN_IPV6=fd00::1
 ```
 
-> 公开文件域名只有 AAAA（NAS 自己的公网 IPv6），而面板容器在专用 bridge 上只有内部 IPv6 且宿主机没有 NAT66，容器内直连会超时。compose 里通过 `extra_hosts` 把域名指向 bridge 的 IPv6 网关（宿主机 Lucky 监听 `:::443`，属本地投递），"设置 → 核对线上版本"即可正常返回 `matching`。若域名可从容器直连，删除该 `extra_hosts` 即可。
-
-启动：
+### 3. 启动
 
 ```bash
 docker compose up -d --build
 ```
 
-访问：
+访问 `http://你的NAS_IP:8787`。
 
-```text
-http://NAS_IP:8787
-```
+## 文件来源
 
-## 文件来源与编辑边界
+默认使用 NAS 主机挂载的目录。可在「来源」页面添加额外的 SMB 或 WebDAV 来源：
 
-默认只有 NAS 主机挂载的 SMB `config` 目录。WebDAV 不再通过环境变量预置，需要时在来源页用 `+` 添加。
+- 每个来源独立设置根目录和配置目录
+- 面板只扫描配置目录直属的 `.yaml/.yml` 文件，不递归子目录
+- 来源凭据仅保存在后端，API 不返回账号密码
+- 支持连接测试、延迟显示和明确错误提示
 
-外部 SMB/WebDAV 来源分别设置连接根目录和“配置目录 / 可编辑目录”。面板只扫描用户所选配置目录直属的 YAML；目录浏览、文件选择、保存、备份和历史恢复都使用该来源与文件的显式上下文。配置目录没有硬编码禁用项；若选择 `rules`，其中直属 YAML 也会按用户选择进入可编辑范围。默认仍为 `config`。
+## 保存流程
 
-编辑已有来源时，账号和密码输入框为空；留空表示继续使用后端保存的原值。
+每次保存执行以下检查：
 
-## 安全保存顺序
+1. 重新读取正式文件并核对哈希（冲突检测）
+2. 在原始文档树上应用结构化修改
+3. 生成完整 Diff 供确认
+4. YAML 重新解析 + Clash/Mihomo 引用检查
+5. 创建临时恢复副本 → 上传 → 回读校验 → 安全替换
+6. 失败时自动恢复，明确区分"未替换 / 已恢复 / 恢复失败"
 
-1. 重新读取正式文件并核对哈希
-2. 在原始 round-trip 文档树上应用结构化修改
-3. 生成完整 Diff
-4. YAML 重新解析
-5. Clash / Mihomo 引用检查
-6. 创建同目录隐藏临时恢复副本
-7. 上传同目录临时文件
-8. 回读临时文件并校验哈希
-9. 同文件系统安全替换正式文件并保留原权限模式
-10. 回读正式文件确认
-11. 失败后重新读取正式文件并核对哈希，明确区分“未替换 / 已恢复 / 恢复失败”
-12. 保存成功后删除临时恢复副本，并记录 Asia/Shanghai 时间、来源路径、哈希和修改行数
+## iPhone 主屏幕
 
-普通保存不再永久生成 `*.backup-*.yaml`。已有历史备份仍可查看、恢复和删除；恢复时使用备份文件原始字节，不做重新 dump。若保存失败且自动恢复也无法确认，临时恢复副本会保留，供人工核对。
+Safari 打开面板后，点击「共享 → 添加到主屏幕」即可创建独立入口。PWA 图标、启动模式和安全区域已适配。
 
-保存前 Diff 完整显示修改前后的真实内容，包括 `password`、`secret`、`token` 和 URL；来源连接凭据仍只由后端保存和使用，不会通过来源 API 返回浏览器。
+> 局域网 HTTP 不是浏览器安全上下文，Service Worker 离线缓存不可用。断网时页面会保留内存草稿并禁止保存。
 
-普通保存不会自动格式化 YAML。
-
-## HTTP 与 iPhone 主屏幕
-
-Safari 可通过“共享 → 添加到主屏幕”创建独立入口，PWA 图标、启动模式和安全区域已经适配。
-
-局域网 IP 的 HTTP 页面不是浏览器安全上下文，因此 Service Worker 离线缓存不可用。断网时当前页面会保留内存草稿并禁止保存；恢复网络后可以继续。
-
-不要把该端口映射到公网。
-
-## 本地验证
+## 本地开发
 
 ```bash
+# 前端
 cd frontend
 npm ci
-npm run build
+npm run build      # 生产构建
+npm run test       # 单元测试
 
-cd ../backend
+# 后端
+cd backend
 python3 -m venv .venv
-.venv/bin/pip install -e '.[test]'
-.venv/bin/pytest -q
+source .venv/bin/activate
+pip install -e '.[test]'
+pytest -q
 ```
+
+## 技术栈
+
+| 层 | 技术 |
+|---|---|
+| 前端 | Vue 3、TypeScript、Vite、Tailwind CSS、Pinia |
+| 后端 | FastAPI、ruamel.yaml（round-trip YAML） |
+| 部署 | Docker Compose、双栈 bridge 网络 |
+| 安全 | read-only 容器、no-new-privileges、cap_drop ALL |
+
+## 注意事项
+
+- **不提供登录页** — 适用于可信内网环境，不要将端口映射到公网
+- **配置中可能包含敏感内容** — 订阅链接、密码、Token 等，不要公开分享截图或 Diff
+- **修改前保留备份** — 不同设备和网络环境下的行为需自行验证
+- **凭据安全** — 来源账号密码仅保存在后端 `sources.json`，不通过 API 返回
+
+## License
+
+MIT
